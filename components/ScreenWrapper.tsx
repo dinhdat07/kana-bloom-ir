@@ -20,7 +20,8 @@ const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ children, title, classNam
           {title}
         </h1>
       )}
-      <div className="screen-content px-5 md:px-6 pb-6"> {/* Increased padding */}
+      {/* Added flex flex-col to screen-content to enable mt-auto for last child */}
+      <div className="screen-content px-5 md:px-6 pb-6 flex flex-col flex-grow"> {/* Increased padding & flex properties */}
         {children}
       </div>
     </div>
