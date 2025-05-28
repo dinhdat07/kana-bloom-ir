@@ -46,6 +46,7 @@ const DrillScreen: React.FC<DrillScreenProps> = ({
   const advancementGateOpenRef = useRef<boolean>(true);
   const stimulusAbortControllerRef = useRef<AbortController | null>(null);
   const audioStimulusPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const speakButtonRef = useRef<HTMLButtonElement>(null) // Thêm ref cho SpeakButton
 
 
   const cleanupStimulusAudio = useCallback(() => {
@@ -138,14 +139,13 @@ const DrillScreen: React.FC<DrillScreenProps> = ({
       advancementGateOpenRef.current = true;
       clearTimeout(nextQuestionTimerRef.current!);
 
-      if (isTtsEnabled) {
-        const stimulusTextToPlay = newQ.stimulusType === 'kana' || newQ.stimulusType === 'word'
-            ? newQ.stimulus
-            : newQ.correctAnswer; // If stimulus is Romaji, speak the Kana/Word answer
-        playStimulusAudio(stimulusTextToPlay);
-      } else {
-        setAnswerOptionsDisabled(false);
-      }
+      // if (isTtsEnabled) {
+      //   const stimulusTextToPlay = newQ.stimulusType === 'kana' || newQ.stimulusType === 'word'
+      //       ? newQ.stimulus
+      //       : newQ.correctAnswer; // If stimulus is Romaji, speak the Kana/Word answer
+      //   playStimulusAudio(stimulusTextToPlay);
+      // } else {
+      setAnswerOptionsDisabled(false);
     }
     return cleanupStimulusAudio;
   }, [currentDrillSet, currentQuestionNumFromApp, isTtsEnabled, playStimulusAudio, cleanupStimulusAudio]);
@@ -168,6 +168,13 @@ const DrillScreen: React.FC<DrillScreenProps> = ({
     }
   }, [loadNextQuestion, handleDrillCompletion]);
 
+  const triggerSpeakButton = useCallback(() => {
+    if (speakButtonRef.current && isTtsEnabled) {
+      console.log("Auto-clicking speak button")
+      speakButtonRef.current.click()
+    }
+  }, [isTtsEnabled])
+
   const handleAnswer = (answer: string) => {
     if (showFeedback || !currentQuestion || stimulusAudioState === 'loading' || stimulusAudioState === 'speaking') return;
 
@@ -182,6 +189,15 @@ const DrillScreen: React.FC<DrillScreenProps> = ({
       triggerPetalBurst(rect.left + rect.width / 2, rect.top + rect.height / 2 - 20, isCorrect ? 7 : 3);
     }
 
+    // // THÊM: Tự động phát audio sau khi chọn đáp án
+    // if (isTtsEnabled && currentQuestion) {
+    //   const stimulusTextToPlay =
+    //     currentQuestion.stimulusType === "kana" || currentQuestion.stimulusType === "word"
+    //       ? currentQuestion.stimulus
+    //       : currentQuestion.correctAnswer
+    //   playStimulusAudio(stimulusTextToPlay)
+    // }
+
     clearTimeout(nextQuestionTimerRef.current!)
     console.log("TTS enabled:", isTtsEnabled)
 
@@ -190,6 +206,11 @@ const DrillScreen: React.FC<DrillScreenProps> = ({
     console.log(`Setting delay: ${delayTime}ms`)
 
     advancementGateOpenRef.current = !isTtsEnabled // Chỉ mở gate khi không có TTS
+
+    // Đặt một timeout ngắn để đảm bảo SpeakButton đã được render
+    setTimeout(() => {
+      triggerSpeakButton()
+    }, 100)
 
     nextQuestionTimerRef.current = setTimeout(() => {
       attemptAdvance();
@@ -280,7 +301,8 @@ const DrillScreen: React.FC<DrillScreenProps> = ({
 
       {isTtsEnabled && showFeedback && feedbackTextForSpeech && (
         <div className="my-3 flex justify-center">
-            <SpeakButton
+          <SpeakButton
+                ref={speakButtonRef} // Thêm ref cho SpeakButton
                 textToSpeak={feedbackTextForSpeech}
                 lang="ja-JP"
                 disabled={!isTtsEnabled}
