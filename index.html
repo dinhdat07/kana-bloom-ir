@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kana Bloom - Sakura Dreamscape</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      /* Base & Backgrounds */
+      --color-lavender-blush-bg: #FEF0F5; /* Slightly brighter body background */
+      --color-snow-bg-shell: rgba(255, 250, 250, 0.88); /* App shell bg - slightly more translucent */
+      --color-soft-pink-border: rgba(255, 192, 203, 0.5);
+      --color-shell-shadow-diffuse: rgba(220, 160, 190, 0.25); /* Softer, more diffuse shadow */
+      --color-shell-shadow-ambient: rgba(210, 130, 160, 0.1);
+
+      /* Primary Interactive Elements (Brighter, Softer Pinks) */
+      --color-primary-from: #FFC0CB; /* Pink */
+      --color-primary-to: #FFB0D0;   /* Lighter, softer pink */
+      --color-primary-text: #9D5C75; /* Softer deep pink/purple */
+
+      /* Secondary Buttons (Gentle & Cute) */
+      --color-secondary-from: #FFF0F5; /* LavenderBlush (almost white pink) */
+      --color-secondary-to: #FFE4E9;   /* Very light misty rose */
+      --color-secondary-text: #B66085; /* Clearer pink text for secondary */
+
+      /* Back/Action Buttons (Soft & Distinct) */
+      --color-action-from: #F0E6FF; /* Softer Lavender */
+      --color-action-to: #E0D6EF;   /* Softer Thistle */
+      --color-action-text: #7A678C;   /* Kept for readability */
+      
+      /* Stimulus & Highlight Text */
+      --color-stimulus-highlight: #F06292; /* Vibrant, cheerful pink */
+      
+      /* General Text Colors */
+      --color-main-text: #A87A99;      /* Softer lavender-pink for body */
+      --color-header-text: #C77B9F; /* Softer, friendly header pink */
+
+      /* Feedback Colors (Kept for clarity, but backgrounds could be softer) */
+      --color-feedback-correct-bg-from: #E0F2F1; /* Lighter Mint/Teal */
+      --color-feedback-correct-bg-to: #B2DFDB;
+      --color-feedback-correct-text: #00796B; /* Teal text */
+
+      --color-feedback-incorrect-bg-from: #FFEBEE; /* Lighter Red */
+      --color-feedback-incorrect-bg-to: #FFCDD2;
+      --color-feedback-incorrect-text: #D32F2F; /* Clear Red text */
+
+      /* Petal & FX */
+      --color-petal-fill: rgba(255, 182, 193, 0.75); /* Main petal color, slightly richer */
+      --color-petal-highlight: rgba(255, 220, 230, 0.95); /* Brighter highlight for petals */
+      --color-petal-glow: rgba(240, 98, 146, 0.35); /* Richer pink glow */
+      --color-petal-special-fill: var(--color-stimulus-highlight);
+
+      /* Disabled State (Clearer visual distinction) */
+      --color-disabled-bg: #EDE7F6; /* Very light lavender, almost grey */
+      --color-disabled-text: #B0A8C2; /* Muted lavender grey text */
+      --color-disabled-border: #D1C4E9;
+
+      /* Gradients (referencing above) */
+      --gradient-primary: linear-gradient(to bottom right, var(--color-primary-from), var(--color-primary-to));
+      --gradient-secondary: linear-gradient(to bottom right, var(--color-secondary-from), var(--color-secondary-to));
+      --gradient-action: linear-gradient(to bottom right, var(--color-action-from), var(--color-action-to));
+      --gradient-correct: linear-gradient(to bottom right, var(--color-feedback-correct-bg-from), var(--color-feedback-correct-bg-to));
+      --gradient-incorrect: linear-gradient(to bottom right, var(--color-feedback-incorrect-bg-from), var(--color-feedback-incorrect-bg-to));
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif; /* Noto Sans JP as fallback */
+      background-color: var(--color-lavender-blush-bg);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(255, 228, 225, 0.45) 0%, transparent 35%), /* Softer, larger blooms */
+        radial-gradient(circle at 90% 85%, rgba(255, 218, 229, 0.5) 0%, transparent 40%),
+        /* Adding a subtle, widespread bokeh/sparkle */
+        radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+    /* App shell - Frosted Glass Effect */
+    .app-shell-container {
+      background-color: var(--color-snow-bg-shell);
+      backdrop-filter: blur(12px) saturate(120%); /* Key for frosted glass + subtle saturation */
+      -webkit-backdrop-filter: blur(12px) saturate(120%); /* Safari support */
+      border-radius: 2rem; /* 32px, softer curve */
+      border: 1px solid var(--color-soft-pink-border);
+      box-shadow: 0 12px 45px var(--color-shell-shadow-diffuse), 0 3px 15px var(--color-shell-shadow-ambient);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 1.5rem); /* Slightly more padding from viewport edges */
+      width: 96%; 
+    }
+    .screen-content {
+      flex-grow: 1;
+      overflow-y: auto;
+      text-align: center;
+      padding: 1rem 1.5rem 1.5rem; /* Generous padding */
+    }
+    .font-display { font-family: 'Mochiy Pop One', 'Noto Sans JP', sans-serif; }
+    .font-kana { font-family: 'Noto Sans JP', sans-serif; }
+
+    /* Enhanced Button Interactions */
+    .btn-interactive:not(:disabled) {
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease-out, filter 0.2s ease-out; /* Springy pop */
+    }
+    .btn-interactive:not(:disabled):hover {
+      transform: translateY(-3px) scale(1.03); /* Slightly more pop */
+      filter: brightness(1.08) saturate(110%); /* Brighter and more saturated */
+      box-shadow: 0 8px 20px var(--color-shell-shadow-diffuse), 0 2px 8px var(--color-shell-shadow-ambient);
+    }
+    .btn-interactive:not(:disabled):active {
+      transform: translateY(0px) scale(0.97); /* More noticeable press */
+      filter: brightness(0.92); 
+      box-shadow: 0 3px 10px var(--color-shell-shadow-diffuse), 0 1px 3px var(--color-shell-shadow-ambient);
+    }
+    .btn-disabled {
+      background-image: none !important; 
+      background-color: var(--color-disabled-bg) !important;
+      color: var(--color-disabled-text) !important;
+      border: 1px solid var(--color-disabled-border) !important;
+      box-shadow: none !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      filter: none !important;
+    }
+    
+    /* Cute Text Shadow */
+    .text-shadow-cute {
+        text-shadow: 0 1px 2px rgba(165, 103, 142, 0.25); /* Softer, more diffused */
+    }
+
+     /* Animations */
+    @keyframes popIn { /* Softer entrance */
+      0% { opacity: 0; transform: translateY(15px) scale(0.92); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-popIn { animation: popIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+
+    @keyframes bounce-correct {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-6px) scale(1.05); } /* More pronounced bounce */
+    }
+    .animate-bounce-correct { animation: bounce-correct 0.35s ease-in-out; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+    .animate-shake { animation: shake 0.35s ease-in-out; }
+    
+    @keyframes swirlAwayPetal {
+        0% { transform: rotate(0deg) translateX(0vw) scale(1); opacity: 0.75; }
+        100% { transform: rotate(720deg) translateX(100vw) scale(0.1); opacity: 0; }
+    }
+    .animate-swirl-away { animation: swirlAwayPetal 0.6s ease-in forwards; }
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0?dev",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime?dev",
+    "react/jsx-dev-runtime": "https://esm.sh/react@18.2.0/jsx-dev-runtime?dev",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/?dev",
+    "react/": "https://esm.sh/react@18.2.0/?dev"
+  }
+}
+</script>
+  <script type="module" src="./index.tsx"></script>
+</body>
+</html>
+<link rel="stylesheet" href="index.css">
+<script src="index.tsx" type="module"></script>
